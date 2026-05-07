@@ -1,0 +1,35 @@
+job_roles:
+  - "Application Support"
+  - "Production Support"
+  - "Cloud Support"
+  - "Cloud Engineer"
+  - "Junior Devops Engineer"
+  - "L1 Support"
+  - "L2 Support"
+
+locations:
+  - "Pune"
+  - "Mumbai"
+  - "Hyderabad"
+  - "Bangalore"
+  - "Remote"
+
+experience:
+  min: 0
+  max: 5
+
+platforms:
+  indeed: true
+  naukri: false    # false for now, Phase 2
+  linkedin: false  # false for now, Phase 3
+
+apply_limit_per_day: 40
+min_ai_score: 6
+
+filters:
+  posted_within_days: 1
+  exclude_keywords:
+    - "10+ years"
+    - "15 years"
+    - "senior manager"
+    - "director"
