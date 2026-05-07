@@ -2,6 +2,7 @@ import yaml
 from database.db_setup   import init_db
 from database.db_manager import save_job, get_applied_keys, get_stats
 from scrapers.indeed_scraper import fetch_indeed_jobs
+from scrapers.naukri_scraper import fetch_naukri_jobs
 from filters.job_filter  import filter_jobs
 from utils.logger        import get_logger
 
@@ -29,6 +30,11 @@ def run_bot():
     if config["platforms"].get("indeed"):
         logger.info("Scraping Indeed...")
         all_jobs += fetch_indeed_jobs()
+
+    if config["platforms"].get("naukri"):
+        logger.info("Scraping Naukri...")
+        all_jobs += fetch_naukri_jobs()
+
 
     logger.info(f"Total raw jobs scraped: {len(all_jobs)}")
 

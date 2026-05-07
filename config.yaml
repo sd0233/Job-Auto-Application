@@ -19,8 +19,8 @@ experience:
   max: 5
 
 platforms:
-  indeed: true
-  naukri: false    # false for now, Phase 2
+  indeed: false # false for now, Phase 2
+  naukri: true   
   linkedin: false  # false for now, Phase 3
 
 apply_limit_per_day: 40
