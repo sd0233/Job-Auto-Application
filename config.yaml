@@ -20,8 +20,8 @@ experience:
 
 platforms:
   indeed: false # false for now, Phase 2
-  naukri: true   
-  linkedin: false  # false for now, Phase 3
+  naukri: false  
+  linkedin: true  # false for now, Phase 3
 
 apply_limit_per_day: 40
 min_ai_score: 6
