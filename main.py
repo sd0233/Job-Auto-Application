@@ -5,7 +5,13 @@ from scrapers.indeed_scraper import fetch_indeed_jobs
 from scrapers.naukri_scraper import fetch_naukri_jobs
 from scrapers.linkedin_scraper import fetch_linkedin_jobs
 from filters.job_filter  import filter_jobs
-from utils.logger        import get_logger
+from ai_engine.scorer import score_job
+from ai_engine.cover_letter import generate_cover_letter
+from utils.logger       import get_logger
+import time
+import random
+
+
 
 logger = get_logger()
 
@@ -63,3 +69,18 @@ def run_bot():
 
 if __name__ == "__main__":
     run_bot()
+
+# TEMP TEST — remove after confirming AI works
+if __name__ == "__main__":
+    from ai_engine.scorer import score_job
+    from ai_engine.cover_letter import generate_cover_letter
+
+    test_title = "Application Support Engineer"
+    test_company = "TCS"
+    test_desc = "Looking for L1 support engineer with Linux and SQL skills"
+
+    score = score_job(test_title, test_desc)
+    print(f"Score: {score}/10")
+
+    cover = generate_cover_letter(test_title, test_company, test_desc)
+    print(f"Cover Letter:\n{cover}")

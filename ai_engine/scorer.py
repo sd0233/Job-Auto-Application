@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from groq import Groq
 import os
 from dotenv import load_dotenv
 from utils.logger import get_logger
@@ -6,33 +6,48 @@ from utils.logger import get_logger
 load_dotenv()
 logger = get_logger()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 MY_RESUME = """
 Name: Sahil Dhote
-Role: Application Support Engineer at Vserv Infosystems (AMNS India)
+Role: Application Support Engineer at Vserv Infosystems (deployed at AMNS India)
 Experience: 8 months
 Skills: Linux, SQL, Python, Shell Scripting, ServiceNow, REST APIs, Postman, iDesk
-Education: B.Tech CSE, Priyadarshini College Nagpur, 2024
+Education: B.Tech CSE, Priyadarshini College Nagpur, 2024, CGPA 7.6
 Target Roles: Application Support, Production Support, Cloud Support, Cloud Engineer
+Certifications: AWS Cloud Practitioner (pursuing)
+Projects: HRMS Support Automation Toolkit, Job Application Bot
 """
 
 def score_job(job_title: str, job_description: str = "") -> int:
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        prompt = f"""
-Rate how well this job matches my profile on a scale of 1 to 10.
-Reply with ONLY a single number. No explanation, no text, just the number.
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{
+                "role": "user",
+                "content": f"""
+Write a short modern cover letter for this job application.
+Rules:
+- Max 100 words
+- No address headers, no date, no subject line
+- Start directly with "Dear Hiring Manager,"
+- Mention company name and role specifically
+- Highlight 2-3 relevant skills
+- End confidently
+
+JOB TITLE: {job_title}
+COMPANY: {company}
+DESCRIPTION: {job_description}
 
 MY PROFILE:
 {MY_RESUME}
-
-JOB TITLE: {job_title}
-JOB DESCRIPTION: {job_description}
 """
-        response = model.generate_content(prompt)
-        score = int(response.text.strip())
-        return max(1, min(10, score))  # clamp between 1-10
+            }],
+            max_tokens=5
+        )
+        score = int(response.choices[0].message.content.strip())
+        return max(1, min(10, score))
+
     except Exception as e:
-        logger.warning(f"[Scorer] Failed to score job '{job_title}': {e}")
-        return 5  # safe default
+        logger.warning(f"[Scorer] Failed to score '{job_title}': {e}")
+        return 5
