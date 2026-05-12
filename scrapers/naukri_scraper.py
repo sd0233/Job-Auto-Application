@@ -93,7 +93,7 @@ def fetch_naukri_jobs() -> list:
             for location in config["locations"]:
                 jobs = _scrape_naukri(driver, role, location, config)
                 all_jobs.extend(jobs)
-                time.sleep(random.uniform(5, 10))
+                time.sleep(random.uniform(3, 5))
 
     finally:
         driver.quit()
@@ -114,6 +114,7 @@ def _scrape_naukri(driver, role: str, location: str, config: dict) -> list:
         url = (
             f"https://www.naukri.com/{role_slug}-jobs-in-{location_slug}"
             f"?experienceList={exp_min}to{exp_max}"
+            f"&jobAge=1"
         )
 
         driver.get(url)

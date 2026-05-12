@@ -10,7 +10,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 MY_RESUME = """
 Name: Sahil Dhote
-Role: Application Support Engineer at Vserv Infosystems (deployed at AMNS India)
+Role: Application Support Engineer at Vserv Infosystems (AMNS India)
 Experience: 8 months
 Skills: Linux, SQL, Python, Shell Scripting, ServiceNow, REST APIs, Postman, iDesk
 Education: B.Tech CSE, Priyadarshini College Nagpur, 2024, CGPA 7.6
@@ -25,29 +25,12 @@ def score_job(job_title: str, job_description: str = "") -> int:
             model="llama-3.1-8b-instant",
             messages=[{
                 "role": "user",
-                "content": f"""
-Write a short modern cover letter for this job application.
-Rules:
-- Max 100 words
-- No address headers, no date, no subject line
-- Start directly with "Dear Hiring Manager,"
-- Mention company name and role specifically
-- Highlight 2-3 relevant skills
-- End confidently
-
-JOB TITLE: {job_title}
-COMPANY: {company}
-DESCRIPTION: {job_description}
-
-MY PROFILE:
-{MY_RESUME}
-"""
+                "content": f"Rate how well this job matches my profile on a scale of 1 to 10. Reply with ONLY a single number. No explanation. No text. Just the number.\n\nMY PROFILE:\n{MY_RESUME}\n\nJOB TITLE: {job_title}\nJOB DESCRIPTION: {job_description}"
             }],
             max_tokens=5
         )
         score = int(response.choices[0].message.content.strip())
         return max(1, min(10, score))
-
     except Exception as e:
         logger.warning(f"[Scorer] Failed to score '{job_title}': {e}")
         return 5
