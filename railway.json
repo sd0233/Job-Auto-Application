@@ -3,7 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn dashboard.app:app --bind 0.0.0.0:8080",
+    "startCommand": "gunicorn dashboard.app:app --bind 0.0.0.0:8080 --log-level debug --timeout 120",
     "restartPolicyType": "ON_FAILURE"
   }
 }
