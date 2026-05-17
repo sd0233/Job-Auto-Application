@@ -30,7 +30,7 @@ def get_driver():
     )
     options.page_load_strategy = "eager"  # don't wait for full page load
     driver = webdriver.Chrome(options=options)
-    driver.set_page_load_timeout(30)  # timeout after 30s max
+    driver.set_page_load_timeout(90)  # timeout after 30s max
     driver.execute_script(
         "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
     )
@@ -38,16 +38,33 @@ def get_driver():
 
 def login_linkedin(driver) -> bool:
     try:
-        logger.info("[LinkedIn] Logging in...")
-        driver.get("https://www.linkedin.com/login")
-        time.sleep(10)
+        import pickle
+        import os as _os
+        logger.info("[LinkedIn] Logging in via cookies...")
 
-        driver.find_element(By.ID, "username").send_keys(os.getenv("LINKEDIN_EMAIL"))
-        time.sleep(1)
-        driver.find_element(By.ID, "password").send_keys(os.getenv("LINKEDIN_PASSWORD"))
-        time.sleep(1)
-        driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+        cookies_path = "linkedin_cookies.pkl"
+        if not _os.path.exists(cookies_path):
+            logger.error("[LinkedIn] No cookies found. Run save_linkedin_cookies.py first.")
+            return False
+
+        try:
+            driver.get("https://www.linkedin.com")
+        except:
+            pass
         time.sleep(8)
+
+        cookies = pickle.load(open(cookies_path, "rb"))
+        for cookie in cookies:
+            try:
+                driver.add_cookie(cookie)
+            except:
+                continue
+
+        try:
+            driver.get("https://www.linkedin.com/feed/")
+        except:
+            pass
+        time.sleep(10)
 
         current = driver.current_url
         logger.info(f"[LinkedIn] After login URL: {current}")
@@ -55,8 +72,8 @@ def login_linkedin(driver) -> bool:
         if "feed" in current or "mynetwork" in current:
             logger.info("[LinkedIn] Login successful")
             return True
-        elif "checkpoint" in current:
-            logger.error("[LinkedIn] Security checkpoint hit")
+        elif "checkpoint" in current or "login" in current:
+            logger.error("[LinkedIn] Cookie login failed — re-run save_linkedin_cookies.py")
             return False
         else:
             logger.info("[LinkedIn] Login successful")
@@ -66,32 +83,6 @@ def login_linkedin(driver) -> bool:
         logger.error(f"[LinkedIn] Login error: {e}")
         return False
 
-def fetch_linkedin_jobs() -> list:
-    with open("config.yaml") as f:
-        config = yaml.safe_load(f)
-
-    all_jobs = []
-    driver = get_driver()
-
-    try:
-        if not login_linkedin(driver):
-            logger.error("[LinkedIn] Cannot proceed without login")
-            return all_jobs
-
-        time.sleep(random.uniform(3, 5))
-
-        for role in config["job_roles"]:
-            for location in config["locations"]:
-                jobs = _scrape_linkedin(driver, role, location, config)
-                all_jobs.extend(jobs)
-                # Longer delay for LinkedIn — very strict bot detection
-                time.sleep(random.uniform(10, 18))
-
-    finally:
-        driver.quit()
-
-    logger.info(f"[LinkedIn] Total jobs fetched: {len(all_jobs)}")
-    return all_jobs
 
 def _scrape_linkedin(driver, role: str, location: str, config: dict) -> list:
     jobs = []
@@ -181,3 +172,30 @@ def _scrape_linkedin(driver, role: str, location: str, config: dict) -> list:
         logger.error(f"[LinkedIn] Failed for '{role}' in {location}: {e}")
 
     return jobs
+
+def fetch_linkedin_jobs() -> list:
+    import yaml
+    with open("config.yaml") as f:
+        config = yaml.safe_load(f)
+
+    all_jobs = []
+    driver = get_driver()
+
+    try:
+        if not login_linkedin(driver):
+            logger.error("[LinkedIn] Cannot proceed without login")
+            return all_jobs
+
+        time.sleep(random.uniform(3, 5))
+
+        for role in config["job_roles"]:
+            for location in config["locations"]:
+                jobs = _scrape_linkedin(driver, role, location, config)
+                all_jobs.extend(jobs)
+                time.sleep(random.uniform(10, 18))
+
+    finally:
+        driver.quit()
+
+    logger.info(f"[LinkedIn] Total jobs fetched: {len(all_jobs)}")
+    return all_jobs

@@ -12,6 +12,7 @@ from filters.job_filter       import filter_jobs
 from ai_engine.scorer         import score_job
 from ai_engine.cover_letter   import generate_cover_letter
 from applicators.naukri_apply import apply_all_naukri
+from applicators.linkedin_apply import apply_all_linkedin
 from utils.logger             import get_logger
 
 logger = get_logger()
@@ -128,7 +129,32 @@ def run_bot():
                     )
             finally:
                 driver.quit()
+    
+    # ── LinkedIn Auto Apply ───────────────────────
+    if config["platforms"].get("linkedin"):
+        all_db_jobs      = get_all_jobs()
+        linkedin_pending = [
+            j for j in all_db_jobs
+            if j["status"] == "shortlisted"
+            and j["platform"] == "linkedin"
+            and j.get("url")
+        ]
 
+        logger.info(f"Pending LinkedIn applications: {len(linkedin_pending)}")
+
+        if linkedin_pending:
+            logger.info("Starting LinkedIn auto-apply...")
+            from scrapers.linkedin_scraper import login_linkedin
+            driver = get_driver()
+            try:
+                if login_linkedin(driver):
+                    apply_all_linkedin(
+                        driver,
+                        linkedin_pending,
+                        limit=25  # LinkedIn max 25/day
+                    )
+            finally:
+                driver.quit()
     # ── Summary ───────────────────────────────────
     stats = get_stats()
     logger.info("=" * 50)
