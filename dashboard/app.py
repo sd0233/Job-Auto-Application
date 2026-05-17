@@ -3,6 +3,27 @@ import sqlite3
 import os
 
 app = Flask(__name__)
+
+# Initialize DB on startup
+import sqlite3, os
+DB_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(DB_DIR, '..', 'jobs.db')
+try:
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT, company TEXT, location TEXT,
+            platform TEXT, url TEXT, job_key TEXT UNIQUE,
+            description TEXT, ai_score INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+except:
+    pass
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'jobs.db')
 
 def get_db():
@@ -310,14 +331,21 @@ function filterTable() {
 
 @app.route("/")
 def index():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT * FROM applications ORDER BY applied_at DESC"
-    )
-    jobs = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    stats = get_stats()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM applications ORDER BY applied_at DESC"
+        )
+        jobs = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        stats = get_stats()
+    except Exception:
+        jobs = []
+        stats = {
+            "total": 0, "shortlisted": 0, "skipped": 0,
+            "scraped": 0, "naukri": 0, "linkedin": 0, "indeed": 0
+        }
     return render_template_string(TEMPLATE, jobs=jobs, stats=stats)
 
 @app.route("/api/jobs")
