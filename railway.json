@@ -1,0 +1,9 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "gunicorn dashboard.app:app --bind 0.0.0.0:8080",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
