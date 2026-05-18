@@ -1,6 +1,6 @@
 # 🤖 Job Application Bot
 
-An end-to-end automated job application system that scrapes, scores, and applies to jobs daily — without any manual effort.
+iAn end-to-end automated job application system that scrapes, scores, and applies to jobs daily — without any manual effort.
 
 ## 🚀 What It Does
 
