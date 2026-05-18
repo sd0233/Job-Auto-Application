@@ -329,6 +329,10 @@ function filterTable() {
 </html>
 """
 
+@app.route("/health")
+def health():
+    return "OK", 200
+
 @app.route("/")
 def index():
     try:
