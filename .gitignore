@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+linkedin_cookies.pkl
+jobs.db
+*.pkl
+*.swp
+save_linkedin_cookies.py
+test_*.py
+run_apply_only.py
